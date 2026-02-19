@@ -37,7 +37,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vxcozy/bridge-ws.git"
+    "url": "git+https://github.com/vxcozy/bridge-ws.git"
   },
   "homepage": "https://github.com/vxcozy/bridge-ws#readme",
   "bugs": {
