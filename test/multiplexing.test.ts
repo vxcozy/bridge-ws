@@ -220,3 +220,56 @@ describe("API key auth", () => {
     ws.close();
   });
 });
+
+describe("origin allowlist", () => {
+  const PORT = 19992;
+  let server: AgentWebSocketServer;
+
+  beforeEach(async () => {
+    const result = await startServer(PORT, {
+      allowedOrigins: ["https://example.com"],
+    });
+    server = result.server;
+  });
+
+  afterEach(async () => {
+    await stopServer(server);
+  });
+
+  it("rejects browser connection with origin not in allowlist", async () => {
+    const ws = new WebSocket(`ws://127.0.0.1:${PORT}`, {
+      headers: { origin: "https://evil.com" },
+    });
+    const code = await new Promise<number>((resolve, reject) => {
+      const t = setTimeout(() => reject(new Error("timed out")), 3000);
+      ws.once("close", (c) => { clearTimeout(t); resolve(c); });
+      ws.once("error", () => { clearTimeout(t); resolve(4003); });
+    });
+    expect(code).toBe(4003);
+  });
+
+  it("accepts browser connection with origin in allowlist", async () => {
+    const ws = new WebSocket(`ws://127.0.0.1:${PORT}`, {
+      headers: { origin: "https://example.com" },
+    });
+    const msg = await new Promise<object>((resolve, reject) => {
+      const t = setTimeout(() => reject(new Error("timed out")), 3000);
+      ws.once("error", (e) => { clearTimeout(t); reject(e); });
+      ws.once("message", (data) => { clearTimeout(t); resolve(JSON.parse(data.toString())); });
+    });
+    expect(msg).toMatchObject({ type: "connected" });
+    ws.close();
+  });
+
+  it("allows CLI/server-side connection with no origin header", async () => {
+    // CLI tools and server-to-server clients never send an Origin header
+    const ws = new WebSocket(`ws://127.0.0.1:${PORT}`);
+    const msg = await new Promise<object>((resolve, reject) => {
+      const t = setTimeout(() => reject(new Error("timed out")), 3000);
+      ws.once("error", (e) => { clearTimeout(t); reject(e); });
+      ws.once("message", (data) => { clearTimeout(t); resolve(JSON.parse(data.toString())); });
+    });
+    expect(msg).toMatchObject({ type: "connected" });
+    ws.close();
+  });
+});

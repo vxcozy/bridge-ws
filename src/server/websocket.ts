@@ -130,8 +130,10 @@ export class AgentWebSocketServer {
     // Origin check
     if (this.options.allowedOrigins && this.options.allowedOrigins.length > 0) {
       const origin = req.headers.origin;
-      if (!origin || !this.options.allowedOrigins.includes(origin)) {
-        this.log.warn({ origin: origin ?? "(none)" }, "Rejected connection: origin not in allowlist");
+      // No Origin header = CLI/server-side client — always allow.
+      // Origin present but not in allowlist = browser client from wrong origin — reject.
+      if (origin && !this.options.allowedOrigins.includes(origin)) {
+        this.log.warn({ origin }, "Rejected connection: origin not in allowlist");
         ws.close(4003, "Origin not allowed");
         return;
       }
