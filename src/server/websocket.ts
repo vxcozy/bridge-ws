@@ -3,6 +3,7 @@ import { createServer, type Server } from "node:http";
 import type { IncomingMessage } from "node:http";
 import { ClaudeProvider, type ClaudeProviderOptions } from "../process/claude-provider.js";
 import { CodexProvider } from "../process/codex-provider.js";
+import { OllamaProvider } from "../process/ollama-provider.js";
 import {
   parseClientMessage,
   serializeMessage,
@@ -26,6 +27,7 @@ interface ConnectionState {
   requests: Map<string, ActiveRequest>;
   claudeRunner: Runner | null;
   codexRunner: Runner | null;
+  ollamaRunner: Runner | null;
   isAlive: boolean;
 }
 
@@ -40,6 +42,8 @@ export interface AgentWebSocketServerOptions {
   maxPayload?: number;
   claudeRunnerFactory?: RunnerFactory;
   codexRunnerFactory?: RunnerFactory;
+  ollamaRunnerFactory?: RunnerFactory;
+  ollamaUrl?: string;           // Ollama base URL, default: http://localhost:11434
   agentName?: string;
   sessionDir?: string;
   apiKey?: string;          // optional: if set, clients must send this as Bearer token on connect
@@ -109,6 +113,7 @@ export class AgentWebSocketServer {
       }
       state.claudeRunner?.dispose();
       state.codexRunner?.dispose();
+      state.ollamaRunner?.dispose();
       ws.terminate();
     }
     this.connections.clear();
@@ -150,6 +155,7 @@ export class AgentWebSocketServer {
       requests: new Map(),
       claudeRunner: null,
       codexRunner: null,
+      ollamaRunner: null,
       isAlive: true,
     };
     this.connections.set(ws, state);
@@ -173,6 +179,7 @@ export class AgentWebSocketServer {
       }
       state.claudeRunner?.dispose();
       state.codexRunner?.dispose();
+      state.ollamaRunner?.dispose();
       this.connections.delete(ws);
     });
 
@@ -221,6 +228,11 @@ export class AgentWebSocketServer {
         state.codexRunner = this.createCodexRunner();
       }
       runner = state.codexRunner;
+    } else if (message.provider === "ollama") {
+      if (!state.ollamaRunner) {
+        state.ollamaRunner = this.createOllamaRunner();
+      }
+      runner = state.ollamaRunner;
     } else {
       if (!state.claudeRunner) {
         state.claudeRunner = this.createClaudeRunner();
@@ -320,6 +332,17 @@ export class AgentWebSocketServer {
     });
   }
 
+  private createOllamaRunner(): Runner {
+    if (this.options.ollamaRunnerFactory) {
+      return this.options.ollamaRunnerFactory(this.log);
+    }
+    return new OllamaProvider({
+      baseUrl: this.options.ollamaUrl,
+      timeoutMs: this.options.timeoutMs,
+      logger: this.log,
+    });
+  }
+
   private startHeartbeat(): void {
     this.heartbeatInterval = setInterval(() => {
       for (const [ws, state] of this.connections) {
@@ -328,6 +351,7 @@ export class AgentWebSocketServer {
           for (const { runner } of state.requests.values()) runner.dispose();
           state.claudeRunner?.dispose();
           state.codexRunner?.dispose();
+          state.ollamaRunner?.dispose();
           this.connections.delete(ws);
           ws.terminate();
           continue;
@@ -341,6 +365,7 @@ export class AgentWebSocketServer {
           for (const { runner } of state.requests.values()) runner.dispose();
           state.claudeRunner?.dispose();
           state.codexRunner?.dispose();
+          state.ollamaRunner?.dispose();
           this.connections.delete(ws);
           ws.terminate();
         }

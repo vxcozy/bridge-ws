@@ -118,6 +118,41 @@ ws.on("message", (data) => {
 
 ---
 
+## Use Ollama as the provider
+
+[Ollama](https://ollama.com) runs open-source models locally without an API key. Start Ollama separately, then add `"provider": "ollama"` to any prompt message:
+
+```js
+ws.send(JSON.stringify({
+  type: "prompt",
+  prompt: "Explain this function",
+  requestId: "req-1",
+  provider: "ollama",
+}));
+```
+
+The default model is `llama3.2`. Override it with the `model` field:
+
+```js
+ws.send(JSON.stringify({
+  type: "prompt",
+  prompt: "Explain this function",
+  requestId: "req-1",
+  provider: "ollama",
+  model: "mistral",
+}));
+```
+
+If Ollama is not running on the default port (`11434`), start bridge-ws with a custom URL:
+
+```bash
+bridge-ws --ollama-url http://localhost:8080
+```
+
+If Ollama is not reachable, the server returns an error for that request but continues serving Claude and Codex requests normally.
+
+---
+
 ## Use Codex as the provider
 
 Add `"provider": "codex"` to any prompt message:

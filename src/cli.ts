@@ -9,12 +9,13 @@ const program = new Command();
 
 program
   .name("bridge-ws")
-  .description("WebSocket bridge for CLI AI agents (Claude, Codex)")
+  .description("WebSocket bridge for CLI AI agents (Claude, Codex, Ollama)")
   .version(VERSION)
   .option("-p, --port <port>", "WebSocket server port", "9999")
   .option("-H, --host <host>", "WebSocket server host", "localhost")
   .option("-c, --claude-path <path>", "Path to Claude CLI", "claude")
   .option("--codex-path <path>", "Path to Codex CLI", "codex")
+  .option("--ollama-url <url>", "Ollama base URL", "http://localhost:11434")
   .option("-t, --timeout <seconds>", "Process timeout in seconds", "300")
   .option("--log-level <level>", "Log level (debug, info, warn, error)", "info")
   .option("--origins <origins>", "Comma-separated allowed origins")
@@ -25,6 +26,7 @@ program
     host: string;
     claudePath: string;
     codexPath: string;
+    ollamaUrl: string;
     timeout: string;
     logLevel: string;
     origins?: string;
@@ -54,6 +56,8 @@ program
     } else {
       console.log("Codex CLI not found (codex provider will be unavailable)");
     }
+
+    console.log(`Ollama provider available at: ${opts.ollamaUrl} (start Ollama separately if needed)`);
 
     const port = parseInt(opts.port, 10);
     if (isNaN(port) || port < 1 || port > 65535) {
@@ -98,6 +102,7 @@ program
       host: opts.host,
       claudePath: opts.claudePath,
       codexPath: opts.codexPath,
+      ollamaUrl: opts.ollamaUrl,
       timeoutMs: timeoutSeconds * 1000,
       logLevel: opts.logLevel,
       allowedOrigins,

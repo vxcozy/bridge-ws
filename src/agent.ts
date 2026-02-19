@@ -12,6 +12,8 @@ export interface AgentWSOptions {
   allowedOrigins?: string[];
   claudeRunnerFactory?: RunnerFactory;
   codexRunnerFactory?: RunnerFactory;
+  ollamaRunnerFactory?: RunnerFactory;
+  ollamaUrl?: string;
   agentName?: string;
   sessionDir?: string;
   apiKey?: string;
@@ -36,6 +38,8 @@ export class AgentWS {
       allowedOrigins: options.allowedOrigins,
       claudeRunnerFactory: options.claudeRunnerFactory,
       codexRunnerFactory: options.codexRunnerFactory,
+      ollamaRunnerFactory: options.ollamaRunnerFactory,
+      ollamaUrl: options.ollamaUrl,
       agentName: options.agentName,
       sessionDir: options.sessionDir,
       apiKey: options.apiKey,

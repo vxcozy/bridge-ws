@@ -1,6 +1,6 @@
 # bridge-ws
 
-WebSocket bridge for CLI AI agents — stream Claude and Codex responses over a persistent connection.
+WebSocket bridge for CLI AI agents — stream Claude, Codex, and Ollama responses over a persistent connection.
 
 ## Install
 
@@ -63,13 +63,14 @@ ws.on("message", (data) => {
 - Node.js ≥ 20
 - [Claude Code](https://claude.ai/code) CLI (`npm install -g @anthropic-ai/claude-code`)
 - [Codex](https://github.com/openai/codex) CLI (optional, for `provider: "codex"`)
+- [Ollama](https://ollama.com) (optional, for `provider: "ollama"` — no API key needed)
 
 ## Features
 
 - **Request multiplexing** — send multiple prompts on a single connection; responses are tagged by `requestId`
 - **Streaming** — response chunks arrive as they are produced, not after completion
 - **Cancellation** — cancel any in-flight request by `requestId`
-- **Two providers** — Claude (`claude`) and Codex (`codex`) on the same server
+- **Three providers** — Claude (`claude`), Codex (`codex`), and Ollama (`ollama`) on the same server
 - **Optional auth** — Bearer token authentication via `BRIDGE_WS_API_KEY`
 - **Health check** — `GET /healthz` on the same port
 - **Library-ready** — import `AgentWebSocketServer` directly and inject custom runners
@@ -82,6 +83,7 @@ ws.on("message", (data) => {
 | `-H, --host <host>` | `localhost` | Bind address |
 | `-c, --claude-path <path>` | `claude` | Path to Claude CLI |
 | `--codex-path <path>` | `codex` | Path to Codex CLI |
+| `--ollama-url <url>` | `http://localhost:11434` | Ollama base URL |
 | `-t, --timeout <seconds>` | `300` | Per-request CLI timeout |
 | `--log-level <level>` | `info` | `debug`, `info`, `warn`, `error` |
 | `--origins <origins>` | _(any)_ | Comma-separated allowed origins |
@@ -99,7 +101,7 @@ ws.on("message", (data) => {
 ### Client → Server
 
 ```jsonc
-// Send a prompt
+// Send a prompt (provider: "claude" | "codex" | "ollama", defaults to "claude")
 { "type": "prompt", "prompt": "...", "requestId": "req-1", "provider": "claude" }
 
 // Cancel a request

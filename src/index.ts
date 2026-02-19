@@ -22,5 +22,6 @@ export {
 } from "./process/base-cli-provider.js";
 export { ClaudeProvider, type ClaudeProviderOptions } from "./process/claude-provider.js";
 export { CodexProvider, type CodexProviderOptions } from "./process/codex-provider.js";
+export { OllamaProvider, type OllamaProviderOptions } from "./process/ollama-provider.js";
 export { cleanOutput } from "./process/output-cleaner.js";
 export { createLogger, type Logger } from "./utils/logger.js";

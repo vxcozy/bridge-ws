@@ -29,7 +29,7 @@ export interface PromptMessage {
   systemPrompt?: string;
   projectId?: string;
   requestId: string;
-  provider?: "claude" | "codex";
+  provider?: "claude" | "codex" | "ollama";
   thinkingTokens?: number;
   images?: PromptImage[];
 }
@@ -134,8 +134,8 @@ export function parseClientMessage(raw: string): ParseResult {
         }
       }
 
-      if (typeof provider === "string" && provider !== "claude" && provider !== "codex") {
-        return { ok: false, error: `Unknown provider: "${provider}" (supported: claude, codex)` };
+      if (typeof provider === "string" && provider !== "claude" && provider !== "codex" && provider !== "ollama") {
+        return { ok: false, error: `Unknown provider: "${provider}" (supported: claude, codex, ollama)` };
       }
 
       // Parse images (optional array of { media_type, data })
@@ -173,7 +173,7 @@ export function parseClientMessage(raw: string): ParseResult {
           systemPrompt: typeof systemPrompt === "string" ? systemPrompt : undefined,
           projectId: typeof projectId === "string" ? projectId : undefined,
           requestId,
-          provider: provider === "codex" ? "codex" : "claude",
+          provider: provider === "codex" ? "codex" : provider === "ollama" ? "ollama" : "claude",
           thinkingTokens: typeof thinkingTokens === "number" && thinkingTokens >= 0 ? thinkingTokens : undefined,
           images: parsedImages,
         },

@@ -34,6 +34,15 @@ describe("parseClientMessage", () => {
       expect(result.message.provider).toBe("codex");
     });
 
+    it("accepts ollama as provider", () => {
+      const result = parseClientMessage(JSON.stringify({
+        type: "prompt", prompt: "hi", requestId: "r1", provider: "ollama",
+      }));
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.message.provider).toBe("ollama");
+    });
+
     it("rejects unknown provider", () => {
       const result = parseClientMessage(JSON.stringify({
         type: "prompt", prompt: "hi", requestId: "r1", provider: "gpt4",

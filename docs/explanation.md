@@ -12,7 +12,7 @@ bridge-ws is a thin WebSocket-to-CLI bridge. It does not implement any AI logic 
 
 1. Opens a WebSocket server.
 2. Receives a text prompt from a client.
-3. Spawns a CLI process (`claude` or `codex`) with that prompt as an argument.
+3. Routes the request to the appropriate backend: spawns a CLI process (`claude` or `codex`), or calls the Ollama HTTP API for `ollama` requests.
 4. Reads the process stdout line by line, parses each line as a structured JSON event, and relays content chunks back to the client as they arrive.
 5. Reports completion or failure when the process exits.
 
@@ -62,9 +62,9 @@ Codex requests are separate: a connection has a distinct codex runner alongside 
 
 ## Provider model
 
-bridge-ws supports two providers: `claude` and `codex`. The provider is specified per request.
+bridge-ws supports three providers: `claude`, `codex`, and `ollama`. The provider is specified per request.
 
-Each provider is a subclass of `BaseCliProvider`, which handles the common lifecycle:
+`ClaudeProvider` and `CodexProvider` are subclasses of `BaseCliProvider`, which handles the common subprocess lifecycle:
 
 - Spawning the process with the correct environment
 - Reading stdout line by line via `readline`
@@ -77,6 +77,8 @@ Subclasses implement two methods:
 - `parseStreamLine()` — interprets one line of stdout output
 
 Claude uses `stream-json` NDJSON format; Codex uses JSONL. Each provider knows how to parse its own format.
+
+`OllamaProvider` is different: it implements the `Runner` interface directly without extending `BaseCliProvider`. Instead of spawning a subprocess, it makes an HTTP `POST` to the Ollama REST API (`/api/generate`) and reads the response as a `ReadableStream` of newline-delimited JSON. Cancellation is handled via `AbortController` rather than process signals.
 
 ---
 

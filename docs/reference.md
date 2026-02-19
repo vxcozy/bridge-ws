@@ -20,6 +20,7 @@ bridge-ws [options]
 | `-H, --host <host>` | `localhost` | WebSocket server bind address |
 | `-c, --claude-path <path>` | `claude` | Path to the Claude CLI binary |
 | `--codex-path <path>` | `codex` | Path to the Codex CLI binary |
+| `--ollama-url <url>` | `http://localhost:11434` | Base URL of the Ollama HTTP API |
 | `-t, --timeout <seconds>` | `300` | Per-request CLI process timeout (1–3600) |
 | `--log-level <level>` | `info` | Log verbosity: `debug`, `info`, `warn`, `error`, `silent` |
 | `--origins <origins>` | _(any)_ | Comma-separated allowlist of permitted origins |
@@ -76,7 +77,7 @@ Send a prompt to the AI agent.
 | `type` | `"prompt"` | yes | Message type |
 | `prompt` | string | yes | The prompt text. Maximum 512 KB. |
 | `requestId` | string | yes | Unique identifier for this request. Must not match any active request on this connection. |
-| `provider` | `"claude"` \| `"codex"` | no | Which CLI agent to use. Defaults to `"claude"`. Unknown values are rejected. |
+| `provider` | `"claude"` \| `"codex"` \| `"ollama"` | no | Which AI agent to use. Defaults to `"claude"`. Unknown values are rejected. |
 | `projectId` | string | no | Scopes the request to a subdirectory. Alphanumeric, hyphens, underscores, dots only. Max 128 chars. |
 | `model` | string | no | Model identifier passed to the CLI. Behaviour depends on the provider. |
 | `systemPrompt` | string | no | System prompt override. Maximum 64 KB. |
@@ -191,7 +192,7 @@ The following conditions result in an `error` message (no `requestId` unless sta
 | `prompt` exceeds 512 KB | `"Prompt exceeds maximum size of ..."` |
 | `requestId` missing or empty | `"Missing or empty 'requestId' field"` |
 | Duplicate `requestId` (active) | `"Request <id> is already in progress"` (with `requestId`) |
-| Unknown `provider` value | `"Unknown provider: \"<value>\" (supported: claude, codex)"` |
+| Unknown `provider` value | `"Unknown provider: \"<value>\" (supported: claude, codex, ollama)"` |
 | `projectId` invalid chars | `"projectId contains invalid characters ..."` |
 | `projectId` exceeds 128 chars | `"projectId exceeds maximum length of 128"` |
 | `systemPrompt` exceeds 64 KB | `"System prompt exceeds maximum size of ..."` |
@@ -257,6 +258,7 @@ import { AgentWebSocketServer } from "bridge-ws";
 | `logger` | Logger | — | **Required.** Pino-compatible logger instance. |
 | `claudePath` | string | `"claude"` | Path to the Claude CLI binary. |
 | `codexPath` | string | `"codex"` | Path to the Codex CLI binary. |
+| `ollamaUrl` | string | `"http://localhost:11434"` | Base URL of the Ollama HTTP API. |
 | `timeoutMs` | number | `300000` | Per-request process timeout in milliseconds. |
 | `allowedOrigins` | string[] | _(any)_ | Origin allowlist. |
 | `maxPayload` | number | `52428800` | Maximum incoming WebSocket message size in bytes (50 MB). |
@@ -267,6 +269,7 @@ import { AgentWebSocketServer } from "bridge-ws";
 | `sessionDir` | string | _(cwd)_ | Base directory for per-project sessions. |
 | `claudeRunnerFactory` | function | _(default)_ | Override Claude runner creation. Signature: `(logger: Logger) => Runner`. |
 | `codexRunnerFactory` | function | _(default)_ | Override Codex runner creation. Same signature. |
+| `ollamaRunnerFactory` | function | _(default)_ | Override Ollama runner creation. Same signature. |
 
 #### Methods
 
