@@ -36,7 +36,7 @@ To limit which web origins can connect (useful when embedding bridge-ws in a web
 bridge-ws --origins https://app.example.com,https://staging.example.com
 ```
 
-Connections from unlisted origins are closed with code `4003`. Connections without an `Origin` header are also rejected when an allowlist is set.
+Connections that send an `Origin` header not in the allowlist are closed with code `4003`. Connections without an `Origin` header (CLI tools, server-to-server clients) are always allowed through.
 
 ---
 
