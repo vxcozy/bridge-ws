@@ -1,6 +1,6 @@
 {
   "name": "bridge-ws",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "WebSocket bridge for CLI AI agents — stream Claude, Codex, and Ollama responses over WebSocket",
   "type": "module",
   "main": "dist/index.js",
@@ -35,6 +35,14 @@
     "streaming"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vxcozy/bridge-ws.git"
+  },
+  "homepage": "https://github.com/vxcozy/bridge-ws#readme",
+  "bugs": {
+    "url": "https://github.com/vxcozy/bridge-ws/issues"
+  },
   "engines": {
     "node": ">=20.0.0"
   },
