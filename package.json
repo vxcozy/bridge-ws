@@ -1,7 +1,7 @@
 {
   "name": "bridge-ws",
   "version": "2.0.0",
-  "description": "WebSocket bridge for CLI AI agents — stream Claude and Codex CLI responses over WebSocket",
+  "description": "WebSocket bridge for CLI AI agents — stream Claude, Codex, and Ollama responses over WebSocket",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
@@ -25,6 +25,7 @@
   "keywords": [
     "claude",
     "codex",
+    "ollama",
     "ai",
     "cli",
     "agent",
